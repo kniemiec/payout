@@ -1,0 +1,9 @@
+{
+  "transferId": "af732c53-4764-4f1d-9060-df776e227aaf",
+  "senderId": "senderId",
+  "recipientId": "recipientId",
+  "money": {
+    "currency": "PLN",
+    "value": 100.00
+  }
+}

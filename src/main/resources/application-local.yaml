@@ -1,0 +1,10 @@
+server:
+  port: 8091
+
+
+spring:
+  data:
+    mongodb:
+      username: data
+      password: example
+      uri: mongodb://user:user@localhost:27017
