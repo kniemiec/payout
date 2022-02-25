@@ -1,5 +1,6 @@
 package com.kniemiec.soft.payout.router;
 
+import com.kniemiec.soft.payout.PayOutConfiguration;
 import com.kniemiec.soft.payout.errorhandler.GlobalErrorHandler;
 import com.kniemiec.soft.payout.handler.TopUpHandler;
 import com.kniemiec.soft.payout.model.Money;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,7 +21,6 @@ import reactor.core.publisher.Mono;
 
 import javax.validation.Validator;
 import java.math.BigDecimal;
-import java.util.Locale;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,8 +29,9 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+//@SpringBootTest
 @WebFluxTest
-@ContextConfiguration(classes = { PayoutRouter.class, TopUpHandler.class, GlobalErrorHandler.class})
+@ContextConfiguration(classes = { PayoutRouter.class, TopUpHandler.class, GlobalErrorHandler.class, PayOutConfiguration.class})
 @AutoConfigureWebTestClient
 public class PayOutRouterTest {
 
@@ -107,7 +109,7 @@ public class PayOutRouterTest {
         // when
         webTestClient
                 .get()
-                .uri(STATUS_URL+topUpStatusData.getId().toString())
+                .uri(STATUS_URL+topUpStatusData.getId())
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -130,12 +132,12 @@ public class PayOutRouterTest {
         // when
         webTestClient
                 .get()
-                .uri(STATUS_URL+invalidId.toString())
+                .uri(STATUS_URL+invalidId)
                 .exchange()
                 .expectStatus()
                 .isNotFound()
                 .expectBody(String.class)
-                .equals("TopUp Operation not found: "+invalidId.toString());
+                .equals("TopUp Operation not found: "+invalidId);
 
         verify(topUpRepository).findById(invalidId.toString());
     }
