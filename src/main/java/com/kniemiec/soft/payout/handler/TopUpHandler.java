@@ -11,13 +11,11 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.time.Duration;
 import java.util.stream.Collectors;
 
 
@@ -40,9 +38,7 @@ public class TopUpHandler {
     public Mono<ServerResponse> topUp(ServerRequest request) {
         return request.bodyToMono(TopUpData.class)
                 .doOnNext(this::validate)
-                .map(topUpData -> {
-                    return TopUpData.toTopUpStatusData(topUpData);
-                })
+                .map(topUpData -> TopUpData.toTopUpStatusData(topUpData))
                 .flatMap(topUpRepository::save)
                 .doOnNext( topUpStatusData -> sink.tryEmitNext(topUpStatusData))
                 .flatMap(ServerResponse.status(HttpStatus.CREATED)::bodyValue);
