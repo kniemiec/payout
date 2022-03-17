@@ -1,11 +1,13 @@
 package com.kniemiec.soft.payout.handler;
 
+import com.kniemiec.soft.payout.confirmation.TopUpConfirmationClient;
 import com.kniemiec.soft.payout.error.ReviewDataException;
 import com.kniemiec.soft.payout.error.TopUpNotFoundException;
 import com.kniemiec.soft.payout.model.TopUpData;
 import com.kniemiec.soft.payout.model.TopUpStatusData;
 import com.kniemiec.soft.payout.repository.TopUpRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -16,6 +18,7 @@ import reactor.core.publisher.Sinks;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.Duration;
 import java.util.stream.Collectors;
 
 
@@ -29,10 +32,19 @@ public class TopUpHandler {
 
     Sinks.Many<TopUpStatusData> sink;
 
-    public TopUpHandler(TopUpRepository topUpRepository, Validator validator, Sinks.Many<TopUpStatusData> sink){
+    TopUpConfirmationClient topUpConfirmationClient;
+
+    @Autowired
+    public TopUpHandler(TopUpRepository topUpRepository, Validator validator, Sinks.Many<TopUpStatusData> sink
+    , TopUpConfirmationClient topUpConfirmationClient){
         this.topUpRepository = topUpRepository;
         this.validator = validator;
         this.sink = sink;
+        this.topUpConfirmationClient = topUpConfirmationClient;
+
+        this.sink.asFlux()
+                .delayElements(Duration.ofMillis(5000))
+                .subscribe( topUpStatusData -> topUpConfirmationClient.confirmTopUp(topUpStatusData.getId()));
     }
 
     public Mono<ServerResponse> topUp(ServerRequest request) {
