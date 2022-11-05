@@ -7,3 +7,8 @@ spring:
       host: localhost
       port: 27017
       database: local
+
+orchestrator:
+  grpc:
+    host: "localhost"
+    port: 9090

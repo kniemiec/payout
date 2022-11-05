@@ -1,6 +1,7 @@
 package com.kniemiec.soft.payout.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -10,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 @Document
+@Builder
 public class TopUpStatusData {
 
     @Id
@@ -21,4 +23,14 @@ public class TopUpStatusData {
     Money money;
 
     Status status;
+
+    public static TopUpStatusData toCompleted(TopUpStatusData topUpStatusData){
+        return TopUpStatusData.builder()
+                .id(topUpStatusData.id)
+                .status(Status.COMPLETED)
+                .money(topUpStatusData.money)
+                .recipientId(topUpStatusData.recipientId)
+                .senderId(topUpStatusData.getSenderId())
+                .build();
+    }
 }
