@@ -1,10 +1,12 @@
 server:
   port: 8091
 
-
 spring:
   data:
     mongodb:
-      username: data
-      password: example
-      uri: mongodb://user:user@localhost:27017
+      uri: mongodb+srv://kniemiec:82e07B2VrahrY0iF@kniemiec-gcp-tests.r8lkfjh.mongodb.net/?retryWrites=true&w=majority
+
+orchestrator:
+  grpc:
+    host: "localhost"
+    port: 9090

@@ -1,6 +1,7 @@
 package com.kniemiec.soft.payout.router;
 
 import com.kniemiec.soft.payout.PayOutConfiguration;
+import com.kniemiec.soft.payout.confirmation.TopUpConfirmationClient;
 import com.kniemiec.soft.payout.errorhandler.GlobalErrorHandler;
 import com.kniemiec.soft.payout.handler.TopUpHandler;
 import com.kniemiec.soft.payout.model.Money;
@@ -8,11 +9,11 @@ import com.kniemiec.soft.payout.model.Status;
 import com.kniemiec.soft.payout.model.TopUpData;
 import com.kniemiec.soft.payout.model.TopUpStatusData;
 import com.kniemiec.soft.payout.repository.TopUpRepository;
+import com.kniemiec.soft.transferorchestrator.topup.TopUpResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
@@ -29,15 +30,19 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-//@SpringBootTest
 @WebFluxTest
-@ContextConfiguration(classes = { PayoutRouter.class, TopUpHandler.class, GlobalErrorHandler.class, PayOutConfiguration.class})
+@ActiveProfiles("test")
+@ContextConfiguration(classes = { PayoutRouter.class, TopUpHandler.class, GlobalErrorHandler.class,
+        PayOutConfiguration.class})
 @AutoConfigureWebTestClient
 public class PayOutRouterTest {
 
 
     @MockBean
     TopUpRepository topUpRepository;
+
+    @MockBean
+    TopUpConfirmationClient topUpConfirmationClient;
 
     @Autowired
     Validator validator;
@@ -61,6 +66,7 @@ public class PayOutRouterTest {
                 topUpDataToSave.getMoney(),
                 Status.COMPLETED);
         when(topUpRepository.save(isA(TopUpStatusData.class))).thenReturn(Mono.just(topUpStatusDataToReceive));
+        when(topUpConfirmationClient.confirmTopUp(isA(String.class))).thenReturn(Mono.just(TopUpResponse.newBuilder().setTransferId(id.toString()).build()));
 
         // when
         webTestClient.post()

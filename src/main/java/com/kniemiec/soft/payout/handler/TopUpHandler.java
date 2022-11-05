@@ -35,16 +35,21 @@ public class TopUpHandler {
     TopUpConfirmationClient topUpConfirmationClient;
 
     @Autowired
-    public TopUpHandler(TopUpRepository topUpRepository, Validator validator, Sinks.Many<TopUpStatusData> sink
-    , TopUpConfirmationClient topUpConfirmationClient){
-        this.topUpRepository = topUpRepository;
+    public TopUpHandler(Validator validator, Sinks.Many<TopUpStatusData> sink
+    , TopUpConfirmationClient topUpConfirmationClient,
+                        TopUpRepository topUpRepository){
         this.validator = validator;
         this.sink = sink;
         this.topUpConfirmationClient = topUpConfirmationClient;
+        this.topUpRepository = topUpRepository;
 
         this.sink.asFlux()
+                .log()
                 .delayElements(Duration.ofMillis(5000))
-                .subscribe( topUpStatusData -> topUpConfirmationClient.confirmTopUp(topUpStatusData.getId()));
+                .subscribe( topUpStatusData -> topUpConfirmationClient.confirmTopUp(topUpStatusData.getId())
+                        .flatMap( confirmation -> topUpRepository.save(TopUpStatusData.toCompleted(topUpStatusData)))
+                        .log()
+                );
     }
 
     public Mono<ServerResponse> topUp(ServerRequest request) {
@@ -53,6 +58,7 @@ public class TopUpHandler {
                 .map(topUpData -> TopUpData.toTopUpStatusData(topUpData))
                 .flatMap(topUpRepository::save)
                 .doOnNext( topUpStatusData -> sink.tryEmitNext(topUpStatusData))
+                .log()
                 .flatMap(ServerResponse.status(HttpStatus.CREATED)::bodyValue);
     }
 
