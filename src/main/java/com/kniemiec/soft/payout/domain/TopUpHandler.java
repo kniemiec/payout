@@ -1,11 +1,11 @@
-package com.kniemiec.soft.payout.handler;
+package com.kniemiec.soft.payout.domain;
 
-import com.kniemiec.soft.payout.confirmation.TopUpConfirmationClient;
-import com.kniemiec.soft.payout.error.ReviewDataException;
-import com.kniemiec.soft.payout.error.TopUpNotFoundException;
-import com.kniemiec.soft.payout.model.TopUpData;
-import com.kniemiec.soft.payout.model.TopUpStatusData;
-import com.kniemiec.soft.payout.repository.TopUpRepository;
+import com.kniemiec.soft.payout.api.errors.exceptions.ReviewDataException;
+import com.kniemiec.soft.payout.api.errors.exceptions.TopUpNotFoundException;
+import com.kniemiec.soft.payout.api.model.TopUpData;
+import com.kniemiec.soft.payout.domain.ports.TopUpConfirmationClient;
+import com.kniemiec.soft.payout.persistence.model.TopUpStatusData;
+import com.kniemiec.soft.payout.persistence.repository.TopUpRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class TopUpHandler {
 
+    private static final String ID = "id";
     TopUpRepository topUpRepository;
 
     Validator validator;
@@ -35,8 +36,9 @@ public class TopUpHandler {
     TopUpConfirmationClient topUpConfirmationClient;
 
     @Autowired
-    public TopUpHandler(Validator validator, Sinks.Many<TopUpStatusData> sink
-    , TopUpConfirmationClient topUpConfirmationClient,
+    public TopUpHandler(Validator validator,
+                        Sinks.Many<TopUpStatusData> sink,
+                        TopUpConfirmationClient topUpConfirmationClient,
                         TopUpRepository topUpRepository){
         this.validator = validator;
         this.sink = sink;
@@ -65,7 +67,6 @@ public class TopUpHandler {
     private void validate(TopUpData topUpData) {
         var violations = validator.validate(topUpData);
         if(violations.size() > 0) {
-            log.warn("Data constraint violation {}",violations);
             var messages = violations.stream()
                     .map(ConstraintViolation::getMessage)
                     .sorted()
@@ -77,7 +78,7 @@ public class TopUpHandler {
     }
 
     public Mono<ServerResponse> status(ServerRequest request) {
-        var id = request.pathVariable("id");
+        var id = request.pathVariable(ID);
         var topUpStatus = topUpRepository
             .findById(id).switchIfEmpty(Mono.error(new TopUpNotFoundException("TopUp Operation not found: "+id)));
         return topUpStatus.flatMap(ServerResponse.ok()::bodyValue).log();

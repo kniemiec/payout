@@ -1,11 +1,10 @@
 package com.kniemiec.soft.payout;
 
-import com.kniemiec.soft.payout.model.Money;
-import com.kniemiec.soft.payout.model.Status;
-import com.kniemiec.soft.payout.model.TopUpData;
-import com.kniemiec.soft.payout.model.TopUpStatusData;
-//import com.kniemiec.soft.payout.repository.TopUpRepository;
-import com.kniemiec.soft.payout.repository.TopUpRepository;
+import com.kniemiec.soft.payout.api.model.Money;
+import com.kniemiec.soft.payout.persistence.model.Status;
+import com.kniemiec.soft.payout.api.model.TopUpData;
+import com.kniemiec.soft.payout.persistence.model.TopUpStatusData;
+import com.kniemiec.soft.payout.persistence.repository.TopUpRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,7 @@ public class TopUpIT {
     List<TopUpStatusData> topUpsList =  List.of(
             new TopUpStatusData(UUID.randomUUID().toString(), "sender1", "recipient1", new Money("PLN", BigDecimal.valueOf(100)), Status.COMPLETED),
             new TopUpStatusData(UUID.randomUUID().toString(), "sender2", "recipient2", new Money("USD", BigDecimal.valueOf(100)),Status.COMPLETED)
-            );;
+            );
 
     static String TOPUP_URL = "/v1/topup";
 
@@ -76,8 +75,22 @@ public class TopUpIT {
     }
 
     @Test
+    void testTopUpFailure(){
+        var newTopUp = new TopUpData();
+
+        webTestClient.post()
+                .uri(TOPUP_URL)
+                .bodyValue(newTopUp)
+                .exchange()
+                .expectStatus()
+                .isBadRequest();
+
+        assertEquals(2,topUpRepository.findAll().count().block());
+    }
+
+    @Test
     void testGetStatus(){
-        var transferId = topUpsList.get(0).getId().toString();
+        var transferId = topUpsList.get(0).getId();
 
         assertEquals(2,topUpRepository.findAll().count().block());
 
@@ -93,6 +106,22 @@ public class TopUpIT {
                     assertNotNull(receivedTopUpData);
                     assertEquals(receivedTopUpData.getId(), transferId);
                 });
+
+        assertEquals(2,topUpRepository.findAll().count().block());
+    }
+
+    @Test
+    void testGetStatusOfNonExistingItemShouldReturnNotFound(){
+        var transferId = UUID.randomUUID();
+
+        assertEquals(2,topUpRepository.findAll().count().block());
+
+        webTestClient
+                .get()
+                .uri(STATUS_URL+transferId)
+                .exchange()
+                .expectStatus()
+                .isNotFound();
 
         assertEquals(2,topUpRepository.findAll().count().block());
     }

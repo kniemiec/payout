@@ -1,6 +1,7 @@
-package com.kniemiec.soft.payout.confirmation;
+package com.kniemiec.soft.payout.adapters;
 
-import com.kniemiec.soft.payout.model.Status;
+import com.kniemiec.soft.payout.domain.ports.TopUpConfirmationClient;
+import com.kniemiec.soft.payout.persistence.model.Status;
 import com.kniemiec.soft.transferorchestrator.topup.TopUpConfirmationServiceGrpc;
 import com.kniemiec.soft.transferorchestrator.topup.TopUpRequest;
 import com.kniemiec.soft.transferorchestrator.topup.TopUpResponse;
@@ -13,27 +14,22 @@ import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
-public class TopUpConfirmationClient {
+public class GrpcTopUpConfirmationClient implements TopUpConfirmationClient {
 
     private final TopUpConfirmationServiceGrpc.TopUpConfirmationServiceBlockingStub blockingStub;
 
-    private final String host;
-
-    private final int port;
-
     ManagedChannel channel;
 
-    public TopUpConfirmationClient(@Value("${orchestrator.grpc.host}") String host,
-                                   @Value("${orchestrator.grpc.port}") int port){
-        this.host = host;
-        this.port = port;
-        channel = ManagedChannelBuilder.forAddress(this.host, this.port)
+    public GrpcTopUpConfirmationClient(@Value("${orchestrator.grpc.host}") String host,
+                                       @Value("${orchestrator.grpc.port}") int port){
+        channel = ManagedChannelBuilder.forAddress(host, port)
                 .usePlaintext()
                 .build();
 
         blockingStub = TopUpConfirmationServiceGrpc.newBlockingStub(channel);
     }
 
+    @Override
     public Mono<TopUpResponse> confirmTopUp(String transferId){
         TopUpRequest topUpRequest = TopUpRequest
                 .newBuilder()

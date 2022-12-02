@@ -1,7 +1,7 @@
-package com.kniemiec.soft.payout.errorhandler;
+package com.kniemiec.soft.payout.api.errors;
 
-import com.kniemiec.soft.payout.error.ReviewDataException;
-import com.kniemiec.soft.payout.error.TopUpNotFoundException;
+import com.kniemiec.soft.payout.api.errors.exceptions.ReviewDataException;
+import com.kniemiec.soft.payout.api.errors.exceptions.TopUpNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.core.io.buffer.DataBufferFactory;

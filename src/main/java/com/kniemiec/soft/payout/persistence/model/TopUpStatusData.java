@@ -1,5 +1,6 @@
-package com.kniemiec.soft.payout.model;
+package com.kniemiec.soft.payout.persistence.model;
 
+import com.kniemiec.soft.payout.api.model.Money;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -1,10 +1,13 @@
-package com.kniemiec.soft.payout.model;
+package com.kniemiec.soft.payout.api.model;
 
+import com.kniemiec.soft.payout.persistence.model.Status;
+import com.kniemiec.soft.payout.persistence.model.TopUpStatusData;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Data
@@ -20,6 +23,7 @@ public class TopUpData {
     @NotBlank(message = "topupData.recipient can not be empty")
     String recipientId;
 
+    @NotNull
     Money money;
 
     public static TopUpStatusData toTopUpStatusData(TopUpData topUpData){

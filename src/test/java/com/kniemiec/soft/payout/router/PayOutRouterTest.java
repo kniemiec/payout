@@ -1,14 +1,15 @@
 package com.kniemiec.soft.payout.router;
 
-import com.kniemiec.soft.payout.PayOutConfiguration;
-import com.kniemiec.soft.payout.confirmation.TopUpConfirmationClient;
-import com.kniemiec.soft.payout.errorhandler.GlobalErrorHandler;
-import com.kniemiec.soft.payout.handler.TopUpHandler;
-import com.kniemiec.soft.payout.model.Money;
-import com.kniemiec.soft.payout.model.Status;
-import com.kniemiec.soft.payout.model.TopUpData;
-import com.kniemiec.soft.payout.model.TopUpStatusData;
-import com.kniemiec.soft.payout.repository.TopUpRepository;
+import com.kniemiec.soft.payout.api.router.PayoutRouter;
+import com.kniemiec.soft.payout.config.PayOutConfiguration;
+import com.kniemiec.soft.payout.adapters.GrpcTopUpConfirmationClient;
+import com.kniemiec.soft.payout.api.errors.GlobalErrorHandler;
+import com.kniemiec.soft.payout.domain.TopUpHandler;
+import com.kniemiec.soft.payout.api.model.Money;
+import com.kniemiec.soft.payout.persistence.model.Status;
+import com.kniemiec.soft.payout.api.model.TopUpData;
+import com.kniemiec.soft.payout.persistence.model.TopUpStatusData;
+import com.kniemiec.soft.payout.persistence.repository.TopUpRepository;
 import com.kniemiec.soft.transferorchestrator.topup.TopUpResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +43,7 @@ public class PayOutRouterTest {
     TopUpRepository topUpRepository;
 
     @MockBean
-    TopUpConfirmationClient topUpConfirmationClient;
+    GrpcTopUpConfirmationClient topUpConfirmationClient;
 
     @Autowired
     Validator validator;

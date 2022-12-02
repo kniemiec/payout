@@ -1,4 +1,4 @@
-package com.kniemiec.soft.payout.error;
+package com.kniemiec.soft.payout.api.errors.exceptions;
 
 public class TopUpNotFoundException extends RuntimeException {
     String message;
